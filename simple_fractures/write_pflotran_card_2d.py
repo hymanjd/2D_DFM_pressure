@@ -1,0 +1,200 @@
+
+def write_pflotran_card_pressure(filename,  
+                                  curr_pressure_in
+                                  ):
+
+    pflotran_card = f"""
+
+#
+#================================================
+
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_FLOW flow
+      MODE RICHARDS
+    /
+  /
+END
+SUBSURFACE
+
+
+#=========================== discretization ===================================
+GRID
+  TYPE unstructured_explicit full_mesh.uge 
+  # GRAVITY 0.d0 0.d0 -9.81d0
+END
+
+#=========================== fluid properties =================================
+FLUID_PROPERTY
+    DIFFUSION_COEFFICIENT 8.9d-9
+END
+ 
+DATASET Permeability
+  FILENAME permeability.h5
+END
+
+DATASET Porosity
+  FILENAME porosity.h5
+END
+
+
+#=========================== material properties ==============================
+MATERIAL_PROPERTY matrix
+  ID 1
+  POROSITY DATASET Porosity
+  TORTUOSITY 0.5d0
+  CHARACTERISTIC_CURVES default
+  PERMEABILITY
+    DATASET Permeability
+  /
+/
+
+MATERIAL_PROPERTY fracture
+  ID 2
+  POROSITY DATASET Porosity
+  TORTUOSITY 0.5d0
+  CHARACTERISTIC_CURVES default
+  PERMEABILITY
+    DATASET Permeability
+  /
+END
+
+#=========================== characteristic curves ============================
+CHARACTERISTIC_CURVES default
+  SATURATION_FUNCTION VAN_GENUCHTEN
+    M 0.5d0
+    ALPHA  1.d-4
+    LIQUID_RESIDUAL_SATURATION 0.1d0
+    MAX_CAPILLARY_PRESSURE 1.d8
+  /
+  PERMEABILITY_FUNCTION MUALEM_VG_LIQ
+    M 0.5d0
+    LIQUID_RESIDUAL_SATURATION 0.1d0
+  /
+END
+
+#=========================== output options ===================================
+OUTPUT
+  # PERIODIC TIME 1.d-2 y
+#  FORMAT TECPLOT BLOCK
+  PRINT_PRIMAL_GRID
+  FORMAT VTK
+  ACKNOWLEDGE_VTK_FLAW
+    MASS_BALANCE
+    MASS_BALANCE_FILE
+    # PERIODIC TIME 1.0d0 y
+    TOTAL_MASS_REGIONS
+      All
+      Fracture 
+      Matrix
+    /
+  /
+
+  VARIABLES
+    LIQUID_PRESSURE
+    LIQUID_SATURATION
+    PERMEABILITY
+    POROSITY
+  /
+END
+
+#=========================== times ============================================
+TIME
+    MAXIMUM_TIMESTEP_SIZE 1.d1 y
+    FINAL_TIME 1.0d2 y
+    # FINAL_TIME 1.0d-5 y
+END
+
+
+
+
+#=========================== regions ==========================================
+REGION All
+  COORDINATES
+    -5.d20 -5.d20 -5.d20
+    5.d20 5.d20 5.d20
+  /
+END 
+
+REGION fracture
+  FILE ./fracture.txt
+END
+
+REGION matrix
+  FILE ./matrix.txt
+END
+
+REGION west
+  FILE boundary_left.ex
+END
+
+REGION east
+  FILE boundary_right.ex
+END
+
+
+#=========================== flow conditions ==================================
+FLOW_CONDITION initial
+  TYPE
+     LIQUID_PRESSURE dirichlet 
+  /
+  LIQUID_PRESSURE 1.005d6
+END
+
+FLOW_CONDITION inflow 
+  TYPE
+     LIQUID_PRESSURE dirichlet 
+  /
+  LIQUID_PRESSURE {curr_pressure_in} 
+END
+
+FLOW_CONDITION outflow
+  TYPE
+     LIQUID_PRESSURE dirichlet 
+  /
+  LIQUID_PRESSURE 1.0d6
+END
+
+
+#=========================== condition couplers ===============================
+# initial condition
+INITIAL_CONDITION
+  FLOW_CONDITION initial
+  REGION fracture
+/
+
+# initial condition
+INITIAL_CONDITION
+  FLOW_CONDITION initial
+  REGION matrix
+/
+
+
+BOUNDARY_CONDITION inflow
+    FLOW_CONDITION inflow 
+    REGION west
+END
+
+## east boundary condition
+BOUNDARY_CONDITION
+  FLOW_CONDITION outflow
+  REGION east
+/
+
+
+#=========================== stratigraphy couplers ============================
+STRATA
+  FILE materials.h5
+END
+
+END_SUBSURFACE
+
+
+"""
+    
+    with open(filename,'w') as fp:
+        fp.write(pflotran_card)
+        fp.flush()
+
+
