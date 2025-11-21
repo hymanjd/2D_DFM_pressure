@@ -113,7 +113,7 @@ with open('fracture.txt', 'w') as fp:
 output_dir = f'run_data_x{domain_index:02d}' 
 os.makedirs(output_dir)
 
-DFN.ncpu = 4
+DFN.ncpu = 1
 DFN.pflotran()
 DFN.parse_pflotran_vtk_python()
 x,y,z,volume = get_uge_information()
