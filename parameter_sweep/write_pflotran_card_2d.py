@@ -174,7 +174,7 @@ BOUNDARY_CONDITION inflow
 END
 
 ## east boundary condition
-BOUNDARY_CONDITION
+BOUNDARY_CONDITION outflow
   FLOW_CONDITION outflow
   REGION east
 /

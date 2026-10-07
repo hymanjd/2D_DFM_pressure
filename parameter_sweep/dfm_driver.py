@@ -77,7 +77,7 @@ cmd = f'lagrit < {src_path}/process_mesh.lgi'
 DFN.call_executable(cmd)
 DFN.aperture = 10 * np.ones(DFN.num_frac)
 
-DFN.lagrit2pflotran()
+DFN.lagrit2pflotran(dim  = 2 )
 DFN.zone2ex(zone_file='boundary_left.zone',  face='west')
 DFN.zone2ex(zone_file='boundary_right.zone', face='east')
 DFN.uge_file = 'full_mesh.uge'
