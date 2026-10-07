@@ -1,0 +1,48 @@
+# ── Sweep configuration for DFM Darcy-flow training data generation ──────────
+#
+# batch_driver.py reads this file, generates lhs_params.csv, then runs
+# dfm_driver.py in parallel (one process per sample).
+#
+# Parametrization: (k_m, k_ratio, p32)
+#   k_f = k_m * k_ratio  (computed at table-generation time, stored in CSV)
+# This ensures every sample has a physically meaningful fracture/matrix contrast.
+
+sweep:
+  num_of_experiments: 16    # LHS samples
+  num_jobs: 4                # parallel workers
+  seed: 42                   # RNG seed for reproducible LHS draws
+
+# ── LHS parameter ranges (log10 space) ───────────────────────────────────────
+parameters:
+  k_m:
+    log10_min: -18.0         # 1e-18 m^2  (tight crystalline matrix)
+    log10_max: -14.0         # 1e-14 m^2  (permeable sandstone-like matrix)
+  k_ratio:
+    log10_min: 2.0           # 100x  — weakly fractured
+    log10_max: 8.0           # 1e8x  — strongly channeled (current baseline)
+  p32:
+    log10_min: -0.301        # ~0.5 m^-1  (sparse network)
+    log10_max:  0.699        # ~5.0 m^-1  (dense network)
+
+# ── Structured diagnostic subset ─────────────────────────────────────────────
+# Small factorial grid appended after the LHS block.
+# Fixed k_m so k_ratio and p32 effects can be read off cleanly for paper figs.
+diagnostic:
+  enabled: false 
+  k_m_fixed: 1.0e-16        # midpoint of k_m range (geometric mean of 1e-18, 1e-14)
+  k_ratio_levels: [1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6, 1.0e7, 1.0e8]  # 7 levels
+  p32_levels:    [0.5, 1.0, 2.0, 3.0, 5.0]                             # 5 levels
+  # 7 × 5 = 35 diagnostic runs; appended as domain_index = N_lhs+1 … N_lhs+35
+
+# ── Working directories created before the sweep ─────────────────────────────
+directories:
+  - mas_files
+  - dfn_info
+  - pflotran_files
+  - h5_files
+
+# ── Per-sample cleanup ────────────────────────────────────────────────────────
+cleanup:
+  remove_jobdir: true
+  remove_logfile: true
+  remove_stdout: true

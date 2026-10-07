@@ -1,0 +1,83 @@
+
+
+
+read / avs / full_mesh.inp / mo_polygon
+
+cmo / printatt / mo_polygon / -xyz- / minmax
+
+pset/ pboundary / attribute / itp /1,0,0 / eq / 10 
+
+pset/pleft/attribute/xic/1,0,0/lt -4.9
+pset/pright/attribute/xic/1,0,0/gt 4.9
+# pset/pbottom/ attribute / yic / 1, 0, 0 / lt / -4.9
+# pset/ptop/ attribute / yic / 1, 0, 0 / gt / 4.9
+
+
+# cmo / addatt / mo_polygon / right / vint / scalar / nnodes
+# cmo / setatt / mo_polygon / right / 1 0 0 / 0
+# cmo / setatt / mo_polygon / right / pset, get, pright / 1
+
+# cmo / addatt / mo_polygon / top / vint / scalar / nnodes
+# cmo / setatt / mo_polygon / top / 1 0 0 / 0
+# cmo / setatt / mo_polygon / top / pset, get, ptop / 1
+
+pset / pfractures / attribute / dfield / 1, 0, 0 / eq 0 
+cmo / addatt / mo_polygon / fracture / vint / scalar / nnodes
+cmo / setatt / mo_polygon / fracture / 1 0 0 / 0
+cmo / setatt / mo_polygon / fracture / pset, get, pfractures / 1
+cmo / setatt / mo_polygon / imt / pset, get, pfractures / 2
+
+cmo / modatt / mo_polygon / isn / ioflag / l
+cmo / modatt / mo_polygon / x_four / ioflag / l
+cmo / modatt / mo_polygon / fac_n / ioflag / l
+cmo / modatt / mo_polygon / dfield / ioflag / l
+cmo / modatt / mo_polygon / rf_field / ioflag / l
+cmo / modatt / mo_polygon / a_b / ioflag / l
+cmo / modatt / mo_polygon / b_a / ioflag / l
+cmo / modatt / mo_polygon / xnorm / ioflag / l
+cmo / modatt / mo_polygon / ynorm / ioflag / l
+cmo / modatt / mo_polygon / znorm / ioflag / l
+cmo / modatt / mo_polygon / evol_one / ioflag / l
+cmo / modatt / mo_polygon / evol_all / ioflag / l
+cmo / modatt / mo_polygon / numbnd / ioflag / l
+cmo / modatt / mo_polygon / id_numb / ioflag / l
+cmo / modatt / mo_polygon / evol_all / ioflag / l
+cmo / modatt / mo_polygon / itp / ioflag / l
+cmo / modatt / mo_polygon / icr / ioflag / l
+cmo / modatt / mo_polygon / meshid / ioflag / l
+cmo / modatt / mo_polygon / id_n_1 / ioflag / l
+cmo / modatt / mo_polygon / id_n_2 / ioflag / l
+cmo / modatt / mo_polygon / pt_gtg / ioflag / l
+cmo / modatt / mo_polygon / pt_gtg / ioflag / l
+cmo / modatt / mo_polygon / top / ioflag / l
+cmo / modatt / mo_polygon / right / ioflag / l
+cmo / modatt / mo_polygon / fracture / ioflag / l
+
+# Dump out Material ID Dat file
+dump / avs2 / materialid.dat / mo_polygon / 0 0 2 0
+
+dump / DFM_2D.inp / mo_polygon
+
+dump / pflotran / full_mesh / mo_polygon / nofilter_zero
+
+# define / ZONE / 1
+# define / FOUT / boundary_top
+# pset / ptop / zone / FOUT/ ascii / ZONE
+
+# define / ZONE / 2
+# define / FOUT / boundary_bottom
+# pset / pbottom / zone / FOUT/ ascii / ZONE
+
+define / ZONE / 3
+define / FOUT / boundary_left
+pset / pleft / zone / FOUT/ ascii / ZONE
+
+define / ZONE / 4
+define / FOUT / boundary_right
+pset / pright / zone / FOUT/ ascii / ZONE
+
+finish 
+
+
+
+
